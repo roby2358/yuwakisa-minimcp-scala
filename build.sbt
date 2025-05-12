@@ -40,10 +40,13 @@ lazy val root = (project in file("."))
     name := "minimcp",
     // idePackagePrefix := Some("yuwakisa"),
     libraryDependencies ++= commonDependencies,
-    
+
     // Add resolvers for common repositories
     resolvers ++= Seq(
       Resolver.sonatypeOssRepos("releases"),
       Resolver.sonatypeOssRepos("snapshots")
-    ).flatten
+    ).flatten,
+
+    // Set the main class for sbt run
+    Compile / run / mainClass := Some("yuwakisa.minimcp.Main")
   )
