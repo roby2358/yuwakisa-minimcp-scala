@@ -33,6 +33,9 @@ val commonDependencies = Seq(
   "commons-io" % "commons-io" % "2.19.0",
   "org.scalamock" %% "scalamock" % "7.3.2" % Test,
   "org.scalameta" %% "munit" % "1.1.1" % Test,
+  // DO NOT USE lihaoyi !
+  "org.slf4j" % "slf4j-simple" % "2.0.9",
+  "org.slf4j" % "slf4j-api" % "2.0.9"
 )
 
 lazy val root = (project in file("."))
