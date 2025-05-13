@@ -5,18 +5,16 @@ import org.eclipse.jetty.ee10.servlet.{ServletContextHandler, ServletHolder}
 import jakarta.servlet.http.HttpServlet
 
 object ServerRunner:
-  lazy val Port = 8889
-  private val logger = Logger(ServerRunner.getClass)
+  val DefaultPort = 8889
 
-class ServerRunner(routes: Map[String, Class[? <: jakarta.servlet.Servlet]]):
-  private val logger = Logger(this.getClass)
+class ServerRunner(port:Int, routes: Map[String, Class[? <: jakarta.servlet.Servlet]]):
+  private val logger = this.getLogger
 
-  // Make these methods protected so they can be overridden in tests
-  protected def createServer(port: Int): Server = new Server(port)
-  protected def createContext(): ServletContextHandler =
+  private def createContext(): ServletContextHandler =
     new ServletContextHandler(ServletContextHandler.SESSIONS)
+  private def createServer(port: Int): Server = new Server(port)
 
-  private lazy val server = createServer(ServerRunner.Port)
+  private lazy val server = createServer(port)
 
   def start(): Unit =
     ctrlCHook()
@@ -26,33 +24,33 @@ class ServerRunner(routes: Map[String, Class[? <: jakarta.servlet.Servlet]]):
     context.setContextPath("/")
 
     // Add servlets to the context
-    routes.foreach { case (path: String, servletClass: Class[? <: HttpServlet]) =>
-      logger.debug(s"Adding servlet mapping: $path -> ${servletClass.getName}")
-      context.addServlet(new ServletHolder(servletClass), path)
-    }
+    routes.foreach:
+      case (path: String, servletClass: Class[? <: HttpServlet]) =>
+        context.addServlet(new ServletHolder(servletClass), path)
 
     // Set the context as the handler for the server
     server.setHandler(context)
 
     // Start the server
-    logger.info(s"Starting server on port ${ServerRunner.Port}")
     server.start()
-    logger.info(s"Server started on localhost:${ServerRunner.Port}")
-    println(s"Server started on localhost:${ServerRunner.Port}")
+    println(s"Server started on localhost:${port}")
     println("Press Enter to stop the server")
     scala.io.StdIn.readLine()
-    logger.info("Server shutdown requested")
-    println("Stopping")
+    println("Server shutdown requested")
     server.stop()
-    logger.info("Server stopped")
+    println("Server stopped")
 
-  def ctrlCHook(): Unit =
+  def stop(): Unit =
+    logger.debug("Forced stop")
+    server.stop()
+
+  private def ctrlCHook(): Unit =
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run(): Unit = {
-        logger.info("Shutdown hook triggered")
+        logger.debug("Shutdown hook triggered")
         try {
           if (server.isRunning) {
-            logger.info("Stopping server from shutdown hook")
+            logger.debug("Stopping server from shutdown hook")
             server.stop()
           }
         } catch {

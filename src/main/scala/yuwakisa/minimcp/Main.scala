@@ -7,7 +7,7 @@ object Main:
     "/hello" -> classOf[HelloWorldServlet],
   )
 
-  val runner = new ServerRunner(routes)
+  val runner = new ServerRunner(ServerRunner.DefaultPort, routes)
 
   def main(args: Array[String]): Unit =
     runner.start()
