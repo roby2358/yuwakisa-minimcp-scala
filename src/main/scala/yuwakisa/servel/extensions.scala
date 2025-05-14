@@ -12,4 +12,12 @@ extension (obj: Any)
   def getLogger: SLF4JLogger = LoggerFactory.getLogger(obj.getClass) 
   
 extension (name: String)
-  def getLogger: SLF4JLogger = LoggerFactory.getLogger(name) 
+  def getLogger: SLF4JLogger = LoggerFactory.getLogger(name)
+
+/**
+ * Extension method for tap
+ */
+extension[A] (a: A)
+  def tap(f: A => Unit): A =
+    f(a)
+    a
