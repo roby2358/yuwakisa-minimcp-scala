@@ -1,13 +1,16 @@
 package yuwakisa.minimcp
 
+import jakarta.servlet.http.HttpServlet
 import yuwakisa.servel.{HelloWorldServlet, ServerRunner, StaticContentServlet}
+import yuwakisa.servel.Types.Routes
 
 object Main:
-  val routes = Map( "/" -> classOf[StaticContentServlet],
+  val routes: Routes = Map(
+    "/" -> classOf[StaticContentServlet],
     "/hello" -> classOf[HelloWorldServlet],
   )
 
-  val runner = new ServerRunner(ServerRunner.DefaultPort, routes)
+  private val runner = new ServerRunner(ServerRunner.DefaultPort, routes)
 
   def main(args: Array[String]): Unit =
     runner.start()

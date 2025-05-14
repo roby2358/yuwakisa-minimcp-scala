@@ -4,6 +4,7 @@ import java.nio.file.{Files, Paths}
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 class StaticContentServlet extends HttpServlet :
+  private val logger = this.getLogger
 
   override protected def doGet(request: HttpServletRequest, response: HttpServletResponse):Unit =
     val c = StaticContent(request.getRequestURI)
@@ -13,5 +14,5 @@ class StaticContentServlet extends HttpServlet :
       case Some(in) =>
         response.setStatus(HttpServletResponse.SC_OK)
         response.setContentType(c.mimeType)
-//        println(s"path=${c.resourcePath} type=${c.mimeType}")
+        logger.debug(s"path=${c.resourcePath} type=${c.mimeType}")
         c.stream(response.getOutputStream)

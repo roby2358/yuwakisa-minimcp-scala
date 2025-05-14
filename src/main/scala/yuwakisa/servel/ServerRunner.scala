@@ -33,7 +33,7 @@ class ServerRunner(port:Int, routes: Map[String, Class[? <: jakarta.servlet.Serv
 
     // Start the server
     server.start()
-    println(s"Server started on localhost:${port}")
+    println(s"Server started on localhost:$port")
     println("Press Enter to stop the server")
     scala.io.StdIn.readLine()
     println("Server shutdown requested")
