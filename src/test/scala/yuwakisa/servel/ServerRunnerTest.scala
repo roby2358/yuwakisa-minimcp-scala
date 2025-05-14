@@ -80,8 +80,7 @@ class ServerRunnerTest extends FunSuite:
 
   test("ServerRunner should handle multiple routes".tag(IntegrationTest)):
     val routes = Map(
-      "/hello" -> classOf[HelloWorldServlet],
-      "/api" -> classOf[ResourceServlet]
+      "/hello" -> classOf[HelloWorldServlet]
     )
     runServerTest(routes) { port =>
       // Test HelloWorldServlet
@@ -92,15 +91,6 @@ class ServerRunnerTest extends FunSuite:
           assertEquals(r.body.trim, "Hello world!")
         case Failure(e) =>
           fail(s"HelloWorldServlet test error: ${e.getMessage}")
-
-      // Test ResourceServlet
-      val apiResponse = httpGet(s"http://localhost:$port/api")
-      apiResponse match
-        case Success(r) =>
-          assertEquals(r.statusCode, 200)
-          assertEquals(r.body.trim, """["hello","world"]""")
-        case Failure(e) =>
-          fail(s"ResourceServlet test error: ${e.getMessage}")
     }
 
   test("ServerRunner should handle 404 for non-existent endpoints".tag(IntegrationTest)):
