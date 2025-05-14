@@ -10,10 +10,10 @@ import scala.io.{Codec, Source}
 class StaticContent(uri: String) :
 
   val PublicPath = "/public"
-  val IndexHtml = "/index.html"
+  val IndexHtml = "index.html"
 
   val resourcePath: String =
-    PublicPath + (if uri.endsWith("/") then IndexHtml else uri)
+    PublicPath + (if uri.endsWith("/") then uri + IndexHtml else uri)
 
   val resourceStream: Option[InputStream] =
     Option(this.getClass.getResourceAsStream(resourcePath))
@@ -24,10 +24,10 @@ class StaticContent(uri: String) :
   val mimeType: String =
     val at = resourcePath.lastIndexOf(".")
     val extension = if at > 0 then resourcePath.substring(at + 1) else resourcePath
-    extension.match
+    extension match
       case "js" => "text/javascript"
       case "png" => "image/png"
-      case _ =>  Files.probeContentType(Paths.get(resourcePath))
+      case _ => Option(Files.probeContentType(Paths.get(resourcePath))).getOrElse("application/octet-stream")
 
   /**
    * Note: Won't do anything if resourceStream is not found

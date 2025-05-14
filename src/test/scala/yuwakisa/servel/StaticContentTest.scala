@@ -10,6 +10,7 @@ class StaticContentTest extends FunSuite:
     val out = new ByteArrayOutputStream()
     content.stream(out)
     val result = new String(out.toByteArray, StandardCharsets.UTF_8)
+    // note: line separators must be LF!
     assertEquals(result, "banana\nboat\nbutton\n")
 
   test("handle directory paths by serving index.html"):
@@ -32,10 +33,14 @@ class StaticContentTest extends FunSuite:
     val content = new StaticContent("/test/image.png")
     assertEquals(content.mimeType, "image/png")
 
-  test("detect correct not null mime types"):
+  test("detect correct standard mime types"):
     val txtContent = new StaticContent("/test/info.txt")
     assert(txtContent.mimeType != null)
-    assert(txtContent.mimeType == "txt")
+    assertEquals(txtContent.mimeType, "text/plain")
+
+  test("handle files without extensions"):
+    val txtContent = new StaticContent("/test/other")
+    assertEquals(txtContent.mimeType, "application/octet-stream")
 
   test("handle non-existent resources"):
     val content = new StaticContent("/nonexistent.txt")
