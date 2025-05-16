@@ -1,1 +1,0 @@
-{"virtualbox":{"/home/vagrant/project":{"create":true,"type":"virtualbox","owner":"vagrant","group":"vagrant","guestpath":"/home/vagrant/project","hostpath":"C:/work/minimcp","disabled":false,"__vagrantfile":true}}}
