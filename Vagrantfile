@@ -7,6 +7,9 @@ Vagrant.configure("2") do |config|
 
   # Network settings
   config.vm.network "private_network", ip: "192.168.56.10"
+  
+  # Port forwarding for web access
+  config.vm.network "forwarded_port", guest: 6274, host: 6274
 
   # Mount the current directory
   config.vm.synced_folder ".", "/home/vagrant/project",
