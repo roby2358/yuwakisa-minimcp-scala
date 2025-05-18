@@ -24,6 +24,8 @@ ThisBuild / scalacOptions ++= Seq(
   
 // Common dependencies
 val commonDependencies = Seq(
+  "org.slf4j" % "slf4j-simple" % "2.0.17",
+  "org.slf4j" % "slf4j-api" % "2.0.17",
   "jakarta.servlet" % "jakarta.servlet-api" % "6.1.0" % Provided,
   "com.fasterxml.jackson.core" % "jackson-core" % "2.19.0",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.19.0",
@@ -31,11 +33,10 @@ val commonDependencies = Seq(
   "org.eclipse.jetty.ee10" % "jetty-ee10-servlet" % "12.0.21",
   "org.eclipse.jetty" % "jetty-server" % "12.0.21",
   "commons-io" % "commons-io" % "2.19.0",
+  "io.modelcontextprotocol.sdk" % "mcp" % "0.10.0",
   "org.scalamock" %% "scalamock" % "7.3.2" % Test,
   "org.scalameta" %% "munit" % "1.1.1" % Test,
   // DO NOT USE lihaoyi !
-  "org.slf4j" % "slf4j-simple" % "2.0.17",
-  "org.slf4j" % "slf4j-api" % "2.0.17"
 )
 
 lazy val root = (project in file("."))

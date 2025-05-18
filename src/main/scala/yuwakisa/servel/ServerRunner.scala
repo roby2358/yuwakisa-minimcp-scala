@@ -1,7 +1,7 @@
 package yuwakisa.servel
 
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.ee10.servlet.{ServletContextHandler, ServletHolder}
+import org.eclipse.jetty.ee10.servlet.{ServletContextHandler, ServletHolder, FilterHolder}
 import jakarta.servlet.http.HttpServlet
 
 object ServerRunner:
@@ -22,6 +22,10 @@ class ServerRunner(port:Int, routes: Map[String, Class[? <: jakarta.servlet.Serv
     // Create a ServletContextHandler with context path "/"
     val context = createContext()
     context.setContextPath("/")
+
+    // Add CORS filter
+    val corsFilter = new FilterHolder(classOf[CorsFilter])
+    context.addFilter(corsFilter, "/*", null)
 
     // Add servlets to the context
     routes.foreach:
