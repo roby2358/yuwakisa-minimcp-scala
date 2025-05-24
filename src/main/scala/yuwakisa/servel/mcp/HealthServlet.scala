@@ -1,4 +1,4 @@
-package yuwakisa.minimcp
+package yuwakisa.servel.mcp
 
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import yuwakisa.servel.Content
