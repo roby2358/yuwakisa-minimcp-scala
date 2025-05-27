@@ -2,12 +2,17 @@ package yuwakisa.servel
 
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.ee10.servlet.{ServletContextHandler, ServletHolder, FilterHolder}
+import jakarta.servlet.{Filter, Servlet}
 import jakarta.servlet.http.HttpServlet
 
 object ServerRunner:
-  val DefaultPort = 8889
+  val DefaultPort = 8000
 
-class ServerRunner(port:Int, routes: Map[String, Class[? <: jakarta.servlet.Servlet]]):
+class ServerRunner(
+  port: Int, 
+  routes: Map[String, Class[? <: Servlet]] = Map.empty,
+  filters: Map[String, Class[? <: Filter]] = Map.empty
+):
   private val logger = this.getLogger
 
   private def createContext(): ServletContextHandler =
@@ -27,9 +32,15 @@ class ServerRunner(port:Int, routes: Map[String, Class[? <: jakarta.servlet.Serv
     val corsFilter = new FilterHolder(classOf[CorsFilter])
     context.addFilter(corsFilter, "/*", null)
 
+    // Add custom filters
+    filters.foreach:
+      case (path: String, filterClass: Class[? <: Filter]) =>
+        val filterHolder = new FilterHolder(filterClass)
+        context.addFilter(filterHolder, path, null)
+
     // Add servlets to the context
     routes.foreach:
-      case (path: String, servletClass: Class[? <: HttpServlet]) =>
+      case (path: String, servletClass: Class[? <: Servlet]) =>
         context.addServlet(new ServletHolder(servletClass), path)
 
     // Set the context as the handler for the server
