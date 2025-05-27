@@ -163,14 +163,19 @@ Invoke with
 The server may answer immediately with a normal JSON body or switch to an SSE stream (same Streamable HTTP rules as earlier). The final payload is always a JSON-RPC result:
 
 {
-  "content":[            // unstructured; multiple slices allowed
-    { "type":"text",   "text":"…" },
-    { "type":"image",  "data":"<b64>", "mimeType":"image/png" },
-    { "type":"resource","resource":{ "uri":"resource://…", … }}
+  "content":[            // array of content items
+    { "type":"text",   "text":"…" }  // text content (required fields: type, text)
   ],
-  "structuredContent":{ … },   // only if outputSchema advertised
-  "isError":false              // true if the tool ran but failed
+  "structuredContent":{ },   // empty object if no structured content
+  "isError":false           // true if the tool ran but failed
 }
+
+Implementation Notes:
+- content[] must contain at least one item
+- Each content item must have a "type" field
+- For text content, both "type" and "text" fields are required
+- structuredContent is always present (empty object if no structured data)
+- nextCursor is always a string (empty string if no more results)
 
 Large or long-running calls should surface progress via SSE chunks or a side-channel notifications/cancelled (see parent spec).
 
