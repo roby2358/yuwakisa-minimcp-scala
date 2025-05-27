@@ -11,6 +11,9 @@ Vagrant.configure("2") do |config|
   # Port forwarding for web access
   config.vm.network "forwarded_port", guest: 6274, host: 6274
 
+  # Port forwarding for web access
+  config.vm.network "forwarded_port", guest: 6277, host: 6277
+
   # Mount the current directory
   config.vm.synced_folder ".", "/home/vagrant/project",
     create: true,
@@ -56,6 +59,9 @@ Vagrant.configure("2") do |config|
     1. SSH into the VM: vagrant ssh
     2. Start Claude Code: claude
     3. Authenticate and start using Claude Code
+
+    To use MCP Inspector:
+    1. npx @modelcontextprotocol/inspector@latest
 
     Your local directory is mounted at ~/project in the VM
     ==================================================
