@@ -1,7 +1,7 @@
 package yuwakisa.servel.mcp.handlers.notification
 
 import yuwakisa.servel.mcp.handlers.MessageHandler
-import McpMessageTypes.*
+import yuwakisa.servel.mcp.McpMessageTypes.*
 import scala.util.Try
 
 class ProgressNotificationHandler extends MessageHandler:

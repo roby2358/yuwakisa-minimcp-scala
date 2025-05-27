@@ -1,6 +1,6 @@
 package yuwakisa.servel.mcp.handlers
 
-import McpMessageTypes.*
+import yuwakisa.servel.mcp.McpMessageTypes.*
 import scala.util.Try
 
 class InitializeHandler extends MessageHandler:

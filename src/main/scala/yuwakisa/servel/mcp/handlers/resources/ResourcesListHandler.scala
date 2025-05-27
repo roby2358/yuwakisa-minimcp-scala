@@ -1,7 +1,8 @@
 package yuwakisa.servel.mcp.handlers.resources
 
 import yuwakisa.servel.mcp.handlers.MessageHandler
-import McpMessageTypes.*
+import yuwakisa.servel.mcp.McpMessageTypes.*
+import yuwakisa.servel.mcp.McpResources
 import scala.util.Try
 
 class ResourcesListHandler extends MessageHandler:

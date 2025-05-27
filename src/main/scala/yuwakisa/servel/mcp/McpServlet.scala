@@ -9,6 +9,7 @@ import java.util.concurrent.{ConcurrentHashMap, ConcurrentLinkedQueue}
 import scala.jdk.CollectionConverters.*
 import scala.util.{Try, Success, Failure}
 import McpMessageTypes.*
+import yuwakisa.servel.mcp.handlers.MessageHandlerRegistry
 
 object McpServlet:
   private val sessions = new ConcurrentHashMap[String, Session]()
