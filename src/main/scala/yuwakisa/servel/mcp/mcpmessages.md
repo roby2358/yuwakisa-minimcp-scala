@@ -1,0 +1,191 @@
+Model Context Protocol — Message-Level Spec
+
+A super-compact crib sheet for LLM agents and tool authors.
+
+MCP Verison: 2025-03-26
+
+1. Envelope (JSON-RPC 2.0) (Model Context Protocol)
+
+// request | notification
+{
+  "jsonrpc": "2.0",
+  "id": "string | number",      // omit for notifications
+  "method": "verb[/scope]",     // e.g. "initialize", "ping", "notifications/cancelled"
+  "params": { … }               // optional, object only
+}
+// response
+{
+  "jsonrpc": "2.0",
+  "id": "same-id",
+  "result": { … }               // or: "error": { code, message, data? }
+}
+
+params MAY include a reserved _meta object for transport hints (see progress).
+
+2. HTTP wrapper (Streamable HTTP transport) (Model Context Protocol)
+
+Header                                        | Sender → Meaning
+--------------------------------------------- | ------------------------------------------------------------------------------
+Accept: application/json, text/event-stream   | client opts into JSON or SSE stream
+Content-Type                                  | server: application/json or text/event-stream
+Mcp-Session-Id: uuid                          | session stickiness (set by server on init, echoed by client)
+Origin:                                       | client origin check (server must verify)
+Last-Event-ID:                                | client resumes dropped SSE stream
+Methods                                       | POST = send JSON-RPC batch; GET = idle SSE channel; DELETE = end session
+
+3. Handshake
+
+Phase                                                            | Who      | JSON
+--------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------
+initialize                                                       | C -> S   | method:"initialize", params:{ protocolVersion, capabilities, clientInfo } (Model Context Protocol)
+InitializeResult                                                 | S -> C   | result:{ protocolVersion, capabilities, serverInfo, instructions? }
+initialized                                                      | C -> S   | method:"notifications/initialized" (no params)
+After this, both sides may send normal requests / notifications. |          |
+
+4. Utility verbs & payloads
+
+Verb                      | Direction | Essential params
+------------------------- | --------- | -------------------------------------------------------------------------------
+ping                      | either    | (none) → empty {} result (Model Context Protocol)
+notifications/cancelled   | either    | requestId, reason? (Model Context Protocol)
+notifications/progress    | either    | progressToken, progress, total?, message? (Model Context Protocol)
+Progress opt-in           | request   | include "_meta":{"progressToken":…} inside params
+
+5. Capability object (excerpt) (Model Context Protocol)
+
+"capabilities": {
+  "roots":        { "listChanged": true },
+  "resources":    { "listChanged": true, "subscribe": true },
+  "tools":        { "listChanged": true },
+  "prompts":      { "listChanged": true },
+  "sampling":     {},
+  "logging":      {},
+  "experimental": {}
+}
+
+Only advertise what you implement; only use what was negotiated.
+
+6. Error codes (common)
+
+Code     | Meaning
+-------- | ------------------------------------------
+-32600   | Invalid JSON-RPC
+-32601   | Unknown method
+-32602   | Invalid params (e.g., bad protocolVersion)
+-32603   | Internal error
+
+7. Shutdown
+
+Close the HTTP/SSE connection — no special JSON required.
+For stdio transport, close stdin/stdout (client first). (Model Context Protocol)
+
+TL;DR
+Wrap every MCP JSON-RPC message in a POST; speak initialize → initialized; use _meta.progressToken for long jobs; cancel with notifications/cancelled; keep-alive with ping; respect Mcp-Session-Id and SSE IDs. That's the whole dance.
+
+MCP Resources — Client↔Server Interactions
+
+A crisp crib sheet for language-model agents.
+
+The resources feature lets servers expose files, database rows, API responses—anything addressable by a URI—to a host application. A server that supports it advertises
+
+"capabilities": { "resources": { "subscribe": true, "listChanged": true } }
+
+so the client knows it can watch for updates and list-change events. (Model Context Protocol)
+
+Message set
+
+JSON-RPC verb (or notification)        | Flow | Core params → payload
+------------------------------------- | ---- | ---------------------------------------------------------
+resources/list                        | C -> S | {cursor?} → {resources[], nextCursor?}
+resources/read                        | C -> S | {uri} → {contents[]}
+resources/templates/list              | C -> S | none → {resourceTemplates[]}
+resources/subscribe                   | C -> S | {uri} → empty result; future updates via notification
+resources/unsubscribe                 | C -> S | {uri} → empty result
+notifications/resources/list_changed  | S -> C | none
+notifications/resources/updated       | S -> C | {uri} (Model Context Protocol)
+
+Payload shapes
+
+Resource — uri · name · description? · mimeType?
+ResourceContent — one of
+    {text} (UTF-8)
+    {blob} (base-64) + mimeType
+ResourceTemplate — uriTemplate (RFC 6570) plus the same descriptive fields.
+
+Pagination is cursor-based: if nextCursor is present the client repeats resources/list with that token. (Model Context Protocol)
+
+Streaming & cancellations
+
+Large reads or rapid update bursts ride the same Streamable HTTP rules defined earlier: server may switch the resources/read reply to an SSE stream; progress or partial chunks surface as individual data: events. Clients may abort long reads with a side-channel notifications/cancelled.
+
+Error numbers
+
+-32002 "resource not found" and -32603 "internal error" are reserved; everything else follows vanilla JSON-RPC. (Model Context Protocol)
+
+Security checklist (tiny)
+
+Validate every incoming URI, enforce access control, and set accurate mimeType values—especially for blob payloads—to keep hosts from blindly executing or displaying unsafe data. (Model Context Protocol)
+
+MCP Tools — Client ↔ Server Interactions
+
+A pocket spec for language-model agents
+
+The tools feature lets a server advertise callable functions that an LLM can invoke. A server that supports it must declare
+
+"capabilities": { "tools": { "listChanged": true } }
+
+so the client knows (a) tools exist and (b) a notification will arrive if the list later changes. (Model Context Protocol)
+
+1. Discovering tools
+
+Send a JSON-RPC request method:"tools/list". params may carry a cursor; the reply returns tools[] plus an optional nextCursor for pagination. Each tool entry contains name, description, inputSchema (JSON Schema), and optionally outputSchema and annotations. (Model Context Protocol)
+
+If the server set listChanged:true, it will later emit the push-notification
+
+{"jsonrpc":"2.0","method":"notifications/tools/list_changed"}
+
+so the client can call tools/list again. (Model Context Protocol)
+
+2. Calling a tool
+
+Invoke with
+
+{
+  "jsonrpc":"2.0",
+  "id":7,
+  "method":"tools/call",
+  "params":{
+    "name":"<tool-name>",
+    "arguments":{ … }        // must satisfy inputSchema
+  }
+}
+
+The server may answer immediately with a normal JSON body or switch to an SSE stream (same Streamable HTTP rules as earlier). The final payload is always a JSON-RPC result:
+
+{
+  "content":[            // unstructured; multiple slices allowed
+    { "type":"text",   "text":"…" },
+    { "type":"image",  "data":"<b64>", "mimeType":"image/png" },
+    { "type":"resource","resource":{ "uri":"resource://…", … }}
+  ],
+  "structuredContent":{ … },   // only if outputSchema advertised
+  "isError":false              // true if the tool ran but failed
+}
+
+Large or long-running calls should surface progress via SSE chunks or a side-channel notifications/cancelled (see parent spec).
+
+3. Errors
+
+Protocol-level problems (unknown tool, bad args, etc.) use standard JSON-RPC errors such as -32602.
+A tool that executes but fails sets isError:true inside its result and explains the failure in content.
+
+4. Security in one breath
+
+Servers must validate every argument, rate-limit and auth calls, and mark dangerous outputs. Clients should confirm sensitive invocations with a human, time-out slow calls, and log everything.
+
+TL;DR
+Advertise tools, let the client tools/list, call with tools/call, stream if needed, push notifications/tools/list_changed when the catalogue shifts, and wrap every payload in the familiar JSON-RPC envelope.
+
+MCP Prompts — Client ↔ Server Interactions
+
+TODO

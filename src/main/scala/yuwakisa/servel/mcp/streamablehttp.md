@@ -1,21 +1,20 @@
-# Streamable HTTP Transport — Model Context Protocol (2025-03-26)
+Streamable HTTP Transport — Model Context Protocol (2025-03-26)
 
 A terse, implementation-accurate reference for LLM agents.
 
-## 1. Core idea
+1. Core idea
 
-All MCP traffic is JSON-RPC 2.0 over one HTTP path (e.g. `/mcp`). The server upgrades any response to Server-Sent Events (SSE) only when streaming is required.
+All MCP traffic is JSON-RPC 2.0 over one HTTP path (e.g. '/mcp'). The server upgrades any response to Server-Sent Events (SSE) only when streaming is required.
 
-## 2. Endpoint contract
+2. Endpoint contract
 
-| Aspect | Requirement |
-|--------|-------------|
-| URL | One server-advertised path (e.g. `/mcp`). |
-| Methods | POST — send messages; GET — open/maintain SSE stream; optional DELETE — terminate session. |
-| Client headers | POST `Accept: application/json, text/event-stream` and `Content-Type: application/json`; after init include `Mcp-Session-Id`.<br>GET `Accept: text/event-stream` (+ `Mcp-Session-Id`). |
-| Server headers | `Content-Type: application/json` or `text/event-stream`; echoes `Mcp-Session-Id` after it is assigned. |
+URL: One server-advertised path (e.g. '/mcp').
+Methods: POST — send messages; GET — open/maintain SSE stream; optional DELETE — terminate session.
+Client headers: POST 'Accept: application/json, text/event-stream' and 'Content-Type: application/json'; after init include 'Mcp-Session-Id'.
+GET 'Accept: text/event-stream' (+ 'Mcp-Session-Id').
+Server headers: 'Content-Type: application/json' or 'text/event-stream'; echoes 'Mcp-Session-Id' after it is assigned.
 
-## 3. Client → Server (POST)
+3. Client → Server (POST)
 
 Body = single JSON-RPC object or batch array.
 
@@ -24,11 +23,10 @@ If the batch contains no requests (only notifications / responses) the server re
 Otherwise:
 
 - Immediate mode — 200 with a JSON body.
-- Streaming mode — 200 + `Content-Type: text/event-stream`; each `data:` block is a JSON-RPC message; the last message(s) satisfy the original request(s).
+- Streaming mode — 200 + 'Content-Type: text/event-stream'; each 'data:' block is a JSON-RPC message; the last message(s) satisfy the original request(s).
 
 To cancel an in-flight request, POST a notification:
 
-```json
 {
   "jsonrpc": "2.0",
   "method": "notifications/cancelled",
@@ -37,53 +35,49 @@ To cancel an in-flight request, POST a notification:
     "reason": "user abort"
   }
 }
-```
 
-## 4. Server → Client
+4. Server → Client
 
 - Passive stream — client issues GET (same path) to hold an SSE connection.
 - Active stream — server upgrades the response to the initiating POST.
 
 The server may interleave its own notifications or even requests before final results. Either side may close the stream. Only one SSE stream may be open per session; a second attempt yields 409 Conflict.
 
-## 5. Resumability
+5. Resumability
 
-Each SSE message may carry an `id:`.
+Each SSE message may carry an 'id:'.
 
-Client reconnects with `Last-Event-ID` to replay anything after that ID.
+Client reconnects with 'Last-Event-ID' to replay anything after that ID.
 
 Replay applies to the stream, not globally.
 
-## 6. Session management (optional)
+6. Session management (optional)
 
-- First successful initialize reply includes header `Mcp-Session-Id: <id>`.
+- First successful initialize reply includes header 'Mcp-Session-Id: <id>'.
 - Every subsequent request from that client must echo the same header.
 - Server may forget a session; further traffic then returns 404.
-- Client may end the session: DELETE `/mcp` with the header.
+- Client may end the session: DELETE '/mcp' with the header.
 - Servers that don't allow explicit deletes return 405.
 
-## 7. Security checklist
+7. Security checklist
 
 - Validate Origin (CORS / CSRF).
 - Bind local servers to 127.0.0.1, not 0.0.0.0.
 - Demand authentication before processing JSON-RPC.
 
-## 8. Status codes
+8. Status codes
 
-| Code | Meaning |
-|------|---------|
-| 200 | JSON body or SSE stream. |
-| 202 | Accepted notifications/responses; no body. |
-| 400 | Malformed JSON-RPC or missing Mcp-Session-Id. |
-| 404 | Unknown / expired session. |
-| 405 | Method not allowed (e.g. server disabled DELETE). |
-| 406 | Required Accept header missing or wrong. |
-| 409 | Second SSE stream attempt for the same session. |
-| 415 | Unsupported Content-Type (must be application/json). |
+200: JSON body or SSE stream.
+202: Accepted notifications/responses; no body.
+400: Malformed JSON-RPC or missing Mcp-Session-Id.
+404: Unknown / expired session.
+405: Method not allowed (e.g. server disabled DELETE).
+406: Required Accept header missing or wrong.
+409: Second SSE stream attempt for the same session.
+415: Unsupported Content-Type (must be application/json).
 
-## 9. Minimal curl recipe
+9. Minimal curl recipe
 
-```bash
 # A) initialize + request (may stream)
 curl -N -X POST https://toolbox.local/mcp \
   -H "Accept: application/json, text/event-stream" \
@@ -103,6 +97,5 @@ curl -X POST https://toolbox.local/mcp \
   -H "Mcp-Session-Id: abc123" \
   -d '{ "jsonrpc":"2.0","method":"notifications/cancelled",
   "params":{"requestId":1,"reason":"timeout"} }'
-```
 
 That's the whole transport, updated to match the reference implementation.
