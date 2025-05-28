@@ -2,14 +2,13 @@ package yuwakisa.servel.mcp.handlers.resources
 
 import yuwakisa.servel.mcp.handlers.MessageHandler
 import yuwakisa.servel.mcp.McpMessageTypes.*
-import yuwakisa.servel.mcp.McpResources
 import scala.util.Try
 
 class ResourcesListHandler extends MessageHandler:
   def canHandle(method: String): Boolean = method == "resources/list"
   
   def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
-    Try {
+    Try:
       val cursor = request.params.flatMap(_.get("cursor").map(_.toString))
       val (resources, nextCursor) = McpResources.listResources(cursor)
       
@@ -19,5 +18,4 @@ class ResourcesListHandler extends MessageHandler:
       JsonRpcResponse(
         result = result,
         id = request.id
-      )
-    } 
+      ) 

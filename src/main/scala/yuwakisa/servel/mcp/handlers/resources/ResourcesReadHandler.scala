@@ -2,15 +2,15 @@ package yuwakisa.servel.mcp.handlers.resources
 
 import yuwakisa.servel.mcp.handlers.MessageHandler
 import yuwakisa.servel.mcp.McpMessageTypes.*
-import yuwakisa.servel.mcp.McpResources
 import yuwakisa.servel.mcp.ResourceContent
-import scala.util.{Try, Success, Failure}
+
+import scala.util.{Failure, Success, Try}
 
 class ResourcesReadHandler extends MessageHandler:
   def canHandle(method: String): Boolean = method == "resources/read"
   
   def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
-    Try {
+    Try:
       val uri = request.params.flatMap(_.get("uri").map(_.toString))
       
       uri match
@@ -44,4 +44,3 @@ class ResourcesReadHandler extends MessageHandler:
             ),
             id = request.id
           )
-    } 

@@ -1,7 +1,9 @@
-package yuwakisa.servel.mcp
+package yuwakisa.servel.mcp.handlers.resources
+
+import yuwakisa.servel.mcp.{Resource, ResourceContent}
 
 import java.time.Instant
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 
 object McpResources:
   private val resources = Map(
@@ -24,15 +26,4 @@ object McpResources:
           ResourceContent.Text(Instant.now().toString)
         ))
       case _ =>
-        Failure(new IllegalArgumentException(s"Resource not found: $uri"))
-
-case class Resource(
-  uri: String,
-  name: String,
-  description: Option[String] = None,
-  mimeType: Option[String] = None
-)
-
-enum ResourceContent:
-  case Text(text: String)
-  case Blob(data: String, mimeType: String) 
+        Failure(new IllegalArgumentException(s"Resource not found: $uri")) 

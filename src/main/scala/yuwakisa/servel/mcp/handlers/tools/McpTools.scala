@@ -1,6 +1,10 @@
-package yuwakisa.servel.mcp
+package yuwakisa.servel.mcp.handlers.tools
 
-import scala.util.{Try, Success, Failure}
+import yuwakisa.servel.mcp.handlers.tools.Tool
+
+import yuwakisa.servel.mcp.handlers.tools.ToolResult
+
+import scala.util.{Failure, Success, Try}
 
 object McpTools:
   private val tools = Map(
@@ -74,18 +78,4 @@ object McpTools:
           case _ =>
             Failure(new IllegalArgumentException(s"Tool not implemented: $name"))
       case None =>
-        Failure(new IllegalArgumentException(s"Tool not found: $name"))
-
-case class Tool(
-  name: String,
-  description: String,
-  inputSchema: Map[String, Any],
-  outputSchema: Map[String, Any] = Map.empty,
-  annotations: Map[String, Any] = Map.empty
-)
-
-case class ToolResult(
-  content: List[Map[String, Any]],  // Must have at least one item
-  structuredContent: Map[String, Any] = Map.empty,
-  isError: Boolean = false
-) 
+        Failure(new IllegalArgumentException(s"Tool not found: $name")) 
