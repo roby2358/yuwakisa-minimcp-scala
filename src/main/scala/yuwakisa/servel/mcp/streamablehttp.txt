@@ -4,7 +4,7 @@ A terse, implementation-accurate reference for LLM agents.
 
 1. Core idea
 
-All MCP traffic is JSON-RPC 2.0 over one HTTP path (e.g. '/mcp'). The server upgrades any response to Server-Sent Events (SSE) only when streaming is required.
+All MCP traffic is JSON-RPC 2.0 in UTF-8 encoding over one HTTP path (e.g. '/mcp'). The server upgrades any response to Server-Sent Events (SSE) only when streaming is required.
 
 2. Endpoint contract
 
@@ -16,7 +16,7 @@ Server headers: 'Content-Type: application/json' or 'text/event-stream'; echoes 
 
 3. Client → Server (POST)
 
-Body = single JSON-RPC object or batch array.
+Body = single JSON-RPC in UTF-8 encoding object or batch array.
 
 If the batch contains no requests (only notifications / responses) the server replies 202 Accepted (empty body).
 
@@ -97,5 +97,3 @@ curl -X POST https://toolbox.local/mcp \
   -H "Mcp-Session-Id: abc123" \
   -d '{ "jsonrpc":"2.0","method":"notifications/cancelled",
   "params":{"requestId":1,"reason":"timeout"} }'
-
-That's the whole transport, updated to match the reference implementation.
