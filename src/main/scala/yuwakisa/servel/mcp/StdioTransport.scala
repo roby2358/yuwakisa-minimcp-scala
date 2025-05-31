@@ -13,12 +13,12 @@ class StdioTransport:
   private val errorWriter = new PrintWriter(System.err, true)
 
   def readMessage(): Try[JsonRpcRequest] =
-    Try {
+    Try:
       val line = reader.readLine()
+      println(line)
       if line == null then
         throw new IllegalStateException("End of input stream")
       objectMapper.readValue(line, classOf[JsonRpcRequest])
-    }
 
   def writeMessage(message: JsonRpcMessage): Unit =
     val json = objectMapper.writeValueAsString(message)
