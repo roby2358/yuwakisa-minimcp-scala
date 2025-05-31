@@ -50,11 +50,13 @@ I'll flesh out these instructions, but it will look like adding this to config:
 
 (untested!)
 
+  "allowDevTools": true,
   "mcpServers": {
     "minimcp": {
       "command": "java",
-      "args": ["C:/Users/roby2/AppData/Roaming/npm/node_modules/@mcphub/gateway/dist/src/mcphub-gateway.js", "-jar", "C:/path/to/jar/minimcp-assembly-0.1.0.jar"]
+      "args": ["-jar", "C:/path/to/jar/minimcp.jar"]
     }
+  }
 
 ## Development Guide
 
