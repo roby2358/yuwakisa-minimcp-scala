@@ -1,11 +1,10 @@
 package yuwakisa.servel.mcp.handlers
 
+import yuwakisa.minimcp.McpRegistry
 import yuwakisa.servel.mcp.handlers.notification.{CancelledNotificationHandler, InitializedNotificationHandler, ProgressNotificationHandler}
 import yuwakisa.servel.mcp.handlers.resources.{ResourcesListHandler, ResourcesReadHandler}
 import yuwakisa.servel.mcp.handlers.tools.{ToolsListHandler, ToolsCallHandler}
 import yuwakisa.servel.mcp.handlers.prompts.{PromptsListHandler, PromptsGetHandler}
-import yuwakisa.servel.mcp.McpRegistry
-import yuwakisa.servel.mcp.handlers.{InitializeHandler, PingHandler}
 
 object MessageHandlerRegistry:
   private val handlers: List[MessageHandler] = List(

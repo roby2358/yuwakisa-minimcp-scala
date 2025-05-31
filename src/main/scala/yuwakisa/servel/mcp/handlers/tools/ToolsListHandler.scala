@@ -1,8 +1,8 @@
 package yuwakisa.servel.mcp.handlers.tools
 
+import yuwakisa.minimcp.McpRegistry
 import yuwakisa.servel.mcp.handlers.MessageHandler
 import yuwakisa.servel.mcp.McpMessageTypes.*
-import yuwakisa.servel.mcp.McpRegistry
 import scala.util.Try
 
 class ToolsListHandler(using tools: List[Tool] = McpRegistry.tools) extends MessageHandler:
