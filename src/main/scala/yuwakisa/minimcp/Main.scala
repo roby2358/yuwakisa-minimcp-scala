@@ -3,7 +3,6 @@ package yuwakisa.minimcp
 import yuwakisa.servel.{ServerRunner, StaticContentServlet}
 import yuwakisa.servel.Types.Routes
 import yuwakisa.servel.mcp.{HealthServlet, McpServlet, ConfigServlet, McpRegistry}
-import yuwakisa.minimcp.resources.CurrentTimeResource
 
 object Main:
   val routes: Routes = Map(
@@ -14,8 +13,6 @@ object Main:
   )
 
   def main(args: Array[String]): Unit =
-    McpRegistry.registerResource(new CurrentTimeResource())
-
     val runner = new ServerRunner(
         port = ServerRunner.DefaultPort,
         routes = routes
