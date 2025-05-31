@@ -5,7 +5,7 @@ import yuwakisa.servel.{ServerRunner, StaticContentServlet}
 import yuwakisa.servel.mcp.{HealthServlet, McpServlet, ConfigServlet}
 
 object StdioMain:
-  private def runServer(): Unit =
+  def runServer(): Unit =
     val routes = Map(
       "/" -> classOf[StaticContentServlet],
       "/health" -> classOf[HealthServlet],
@@ -24,7 +24,7 @@ object StdioMain:
         e.printStackTrace()
         System.exit(1)
 
-  private def runStdio(): Unit =
+  def runStdio(): Unit =
     val server = new StdioServer()
     try
       server.start()
@@ -34,8 +34,8 @@ object StdioMain:
         e.printStackTrace()
         System.exit(1)
 
-@main def main(args: Array[String]): Unit =
-  if args.length > 0 && args(0) == "--server" then
+@main def main(server: Boolean = false): Unit =
+  if server then
     StdioMain.runServer()
   else
     StdioMain.runStdio() 
