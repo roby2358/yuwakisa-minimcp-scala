@@ -61,6 +61,6 @@ lazy val root = (project in file("."))
       case x => MergeStrategy.first
     },
     assembly / assemblyJarName := "minimcp.jar",
-    assembly / mainClass := Some("yuwakisa.minimcp.StdioMain")
+    assembly / mainClass := Some("yuwakisa.minimcp.Main")
   )
   .enablePlugins(AssemblyPlugin)
