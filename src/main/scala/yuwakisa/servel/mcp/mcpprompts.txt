@@ -34,7 +34,7 @@ Invoke with
   }
 }
 
-The server returns messages[] (array of role-based messages), includeContext, and optional metadata. Each message has role ("user" | "assistant" | "system") and content.
+The server returns messages[] (array of role-based messages), includeContext, and optional metadata. Each message has role ("user" | "assistant") and content.
 
 Content types:
 - text: { "type": "text", "text": "..." }

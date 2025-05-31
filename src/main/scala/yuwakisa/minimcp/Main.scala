@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServlet
 import yuwakisa.servel.{ServerRunner, StaticContentServlet}
 import yuwakisa.servel.Types.Routes
 import yuwakisa.servel.mcp.{HealthServlet, McpServlet, ConfigServlet}
+import yuwakisa.servel.mcp.handlers.resources.McpResources
+import yuwakisa.minimcp.resources.CurrentTimeResource
 
 object Main:
   val routes: Routes = Map(
@@ -19,4 +21,9 @@ object Main:
   )
 
   def main(args: Array[String]): Unit =
+    // Initialize resources
+    McpResources.initialize(Map(
+      "current_time" -> new CurrentTimeResource()
+    ))
+    
     runner.start()
