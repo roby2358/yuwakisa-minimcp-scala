@@ -44,6 +44,18 @@ MiniMCP is a Scala-based MCP (Model Context Protocol) server implementation that
 
    Note: The JAR file will be created in the `target/scala-2.13/` directory after running `sbt assembly`. The exact filename may vary depending on your project version.
 
+### Claude Desktop
+
+I'll flesh out these instructions, but it will look like adding this to config:
+
+(untested!)
+
+  "mcpServers": {
+    "minimcp": {
+      "command": "java",
+      "args": ["C:/Users/roby2/AppData/Roaming/npm/node_modules/@mcphub/gateway/dist/src/mcphub-gateway.js", "-jar", "C:/path/to/jar/minimcp-assembly-0.1.0.jar"]
+    }
+
 ## Development Guide
 
 ### Project Structure
