@@ -2,16 +2,15 @@ package yuwakisa.servel.mcp.handlers.prompts
 
 import yuwakisa.servel.mcp.handlers.MessageHandler
 import yuwakisa.servel.mcp.McpMessageTypes.*
-import yuwakisa.servel.mcp.McpPrompts.*
 
 import scala.util.Try
 
-class PromptsListHandler extends MessageHandler:
+class PromptsListHandler(using prompts: List[Prompt]) extends MessageHandler:
   def canHandle(method: String): Boolean = method == "prompts/list"
 
   private def listPrompts(cursor: Option[String]): (List[Prompt], Option[String]) =
     // Simple pagination - just return all prompts for now
-    (prompts.values.toList, None)
+    (prompts, None)
 
   def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
     Try:

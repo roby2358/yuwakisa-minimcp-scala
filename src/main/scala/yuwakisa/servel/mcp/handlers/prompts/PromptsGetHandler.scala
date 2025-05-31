@@ -2,14 +2,13 @@ package yuwakisa.servel.mcp.handlers.prompts
 
 import yuwakisa.servel.mcp.handlers.MessageHandler
 import yuwakisa.servel.mcp.McpMessageTypes.*
-import yuwakisa.servel.mcp.McpPrompts.*
 
 import scala.util.{Failure, Success, Try}
 
 // Note: Message roles are currently limited to "user" and "assistant" for compatibility
 // with existing clients. The original spec included "system" as a valid role, but this
 // was removed to match client validation requirements.
-class PromptsGetHandler extends MessageHandler:
+class PromptsGetHandler(using prompts: List[Prompt]) extends MessageHandler:
   def canHandle(method: String): Boolean = method == "prompts/get"
 
   def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
@@ -20,11 +19,11 @@ class PromptsGetHandler extends MessageHandler:
       
       name match
         case Some(n) =>
-          getPromptMessages(n, arguments) match
-            case Some(messages) =>
+          prompts.find(_.name == n) match
+            case Some(prompt) =>
               JsonRpcResponse(
                 result = Map(
-                  "messages" -> messages,
+                  "messages" -> prompt.getMessages(arguments),
                   "includeContext" -> "none"
                 ),
                 id = request.id

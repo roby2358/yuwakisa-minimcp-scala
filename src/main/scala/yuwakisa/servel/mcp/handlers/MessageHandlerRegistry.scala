@@ -5,20 +5,21 @@ import yuwakisa.servel.mcp.handlers.resources.{ResourcesListHandler, ResourcesRe
 import yuwakisa.servel.mcp.handlers.tools.{ToolsListHandler, ToolsCallHandler}
 import yuwakisa.servel.mcp.handlers.prompts.{PromptsListHandler, PromptsGetHandler}
 import yuwakisa.servel.mcp.McpRegistry
+import yuwakisa.servel.mcp.handlers.{InitializeHandler, PingHandler}
 
 object MessageHandlerRegistry:
   private val handlers: List[MessageHandler] = List(
+    new CancelledNotificationHandler,
+    new InitializedNotificationHandler,
     new InitializeHandler,
     new PingHandler,
-    new CancelledNotificationHandler,
     new ProgressNotificationHandler,
-    new ToolsListHandler,
-    new ToolsCallHandler,
+    new PromptsGetHandler(using McpRegistry.prompts),
+    new PromptsListHandler(using McpRegistry.prompts),
     new ResourcesListHandler(using McpRegistry.resources),
     new ResourcesReadHandler(using McpRegistry.resources),
-    new InitializedNotificationHandler,
-    new PromptsListHandler,
-    new PromptsGetHandler
+    new ToolsCallHandler,
+    new ToolsListHandler,
   )
   
   def getHandler(method: String): Option[MessageHandler] =
