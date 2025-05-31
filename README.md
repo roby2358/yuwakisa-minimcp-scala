@@ -3,6 +3,8 @@
 ## Overview
 MiniMCP is a Scala-based MCP (Model Context Protocol) server implementation that provides a robust foundation for building AI model context management servers. The primary implementation uses stdio for communication, with an optional streamable server mode. This server implementation focuses on protocol handling, packet processing, and context management while maintaining clean architecture and extensibility.
 
+*This is just a toy, not a serious implementation!*
+
 ## Features
 - Model Context Protocol implementation
 - Primary stdio-based communication
