@@ -52,5 +52,15 @@ lazy val root = (project in file("."))
     ).flatten,
 
     // Set the main class for sbt run
-    Compile / run / mainClass := Some("yuwakisa.minimcp.Main")
+    Compile / run / mainClass := Some("yuwakisa.minimcp.Main"),
+
+    // Assembly settings for creating executable JAR
+    assembly / assemblyMergeStrategy := {
+      case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
+      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+      case x => MergeStrategy.first
+    },
+    assembly / assemblyJarName := "minimcp.jar",
+    assembly / mainClass := Some("yuwakisa.minimcp.StdioMain")
   )
+  .enablePlugins(AssemblyPlugin)
