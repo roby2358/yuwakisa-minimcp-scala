@@ -7,10 +7,10 @@ case class ToolResult(
                      )
 
 trait Tool:
-  def name: String
-  def description: String
-  def inputSchema: Map[String, Any]
-  def outputSchema: Map[String, Any] = Map.empty
-  def annotations: Map[String, Any] = Map.empty
+  val name: String
+  val description: String
+  val inputSchema: Map[String, Any]
+  val outputSchema: Map[String, Any]
+  val annotations: Map[String, Any]
   
   def call(input: Map[String, Any]): Map[String, Any]

@@ -2,12 +2,14 @@ package yuwakisa.minimcp.tools
 
 import yuwakisa.servel.mcp.handlers.tools.Tool
 
-class EchoTool extends Tool {
-  override def name: String = "echo"
+object EchoTool extends Tool {
+  val name: String = "echo"
   
-  override def description: String = "Echoes back the input message"
+  val description: String = "Echoes back the input message"
   
-  override def inputSchema: Map[String, Any] = Map(
+  val annotations: Map[String, Any] = Map.empty
+  
+  val inputSchema: Map[String, Any] = Map(
     "type" -> "object",
     "properties" -> Map(
       "message" -> Map(
@@ -18,7 +20,7 @@ class EchoTool extends Tool {
     "required" -> List("message")
   )
   
-  override def outputSchema: Map[String, Any] = Map(
+  val outputSchema: Map[String, Any] = Map(
     "type" -> "object",
     "properties" -> Map(
       "content" -> Map(
@@ -45,7 +47,7 @@ class EchoTool extends Tool {
     "required" -> List("content", "structuredContent", "isError")
   )
   
-  override def call(input: Map[String, Any]): Map[String, Any] = {
+  def call(input: Map[String, Any]): Map[String, Any] = {
     input.get("message") match {
       case Some(message) if message.isInstanceOf[String] =>
         Map(

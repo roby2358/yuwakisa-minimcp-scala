@@ -5,11 +5,9 @@ import yuwakisa.servel.mcp.handlers.tools.Tool
 import yuwakisa.minimcp.resources.CurrentTimeResource
 import yuwakisa.minimcp.tools.EchoTool
 import yuwakisa.minimcp.prompts.GreetingPrompt
-import yuwakisa.servel.mcp.handlers.prompts.{Prompt, PromptMessage}
+import yuwakisa.servel.mcp.handlers.prompts.Prompt
 
 object McpRegistry:
-  val resources: List[Resource] = List(new CurrentTimeResource())
-  val tools: List[Tool] = List(new EchoTool())
-  val prompts: List[Prompt] = List(GreetingPrompt)
-
-  given McpRegistry.type = this 
+  val resources: List[Resource] = List(CurrentTimeResource)
+  val tools: List[Tool] = List(EchoTool)
+  val prompts: List[Prompt] = List(GreetingPrompt) 
