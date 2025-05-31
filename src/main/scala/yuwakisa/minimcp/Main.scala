@@ -1,10 +1,8 @@
 package yuwakisa.minimcp
 
-import jakarta.servlet.http.HttpServlet
 import yuwakisa.servel.{ServerRunner, StaticContentServlet}
 import yuwakisa.servel.Types.Routes
-import yuwakisa.servel.mcp.{HealthServlet, McpServlet, ConfigServlet}
-import yuwakisa.servel.mcp.handlers.resources.McpResources
+import yuwakisa.servel.mcp.{HealthServlet, McpServlet, ConfigServlet, McpRegistry}
 import yuwakisa.minimcp.resources.CurrentTimeResource
 
 object Main:
@@ -15,15 +13,12 @@ object Main:
     "/mcp" -> classOf[McpServlet]
   )
 
-  private val runner = new ServerRunner(
-    port = ServerRunner.DefaultPort,
-    routes = routes
-  )
-
   def main(args: Array[String]): Unit =
-    // Initialize resources
-    McpResources.initialize(Map(
-      "current_time" -> new CurrentTimeResource()
-    ))
-    
+    McpRegistry.registerResource(new CurrentTimeResource())
+
+    val runner = new ServerRunner(
+        port = ServerRunner.DefaultPort,
+        routes = routes
+      )
+
     runner.start()

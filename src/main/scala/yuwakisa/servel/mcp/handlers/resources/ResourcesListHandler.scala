@@ -5,12 +5,12 @@ import yuwakisa.servel.mcp.McpMessageTypes.*
 
 import scala.util.Try
 
-class ResourcesListHandler extends MessageHandler:
+class ResourcesListHandler(using resources: List[Resource]) extends MessageHandler:
   def canHandle(method: String): Boolean = method == "resources/list"
 
   private def listResources(cursor: Option[String]): (List[Resource], Option[String]) =
     // Simple pagination - just return all resources for now
-    (McpResources.resources.values.toList, None)
+    (resources, None)
 
   def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
     Try:

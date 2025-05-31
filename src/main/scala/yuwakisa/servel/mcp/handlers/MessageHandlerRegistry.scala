@@ -4,6 +4,7 @@ import yuwakisa.servel.mcp.handlers.notification.{CancelledNotificationHandler, 
 import yuwakisa.servel.mcp.handlers.resources.{ResourcesListHandler, ResourcesReadHandler}
 import yuwakisa.servel.mcp.handlers.tools.{ToolsListHandler, ToolsCallHandler}
 import yuwakisa.servel.mcp.handlers.prompts.{PromptsListHandler, PromptsGetHandler}
+import yuwakisa.servel.mcp.McpRegistry
 
 object MessageHandlerRegistry:
   private val handlers: List[MessageHandler] = List(
@@ -13,8 +14,8 @@ object MessageHandlerRegistry:
     new ProgressNotificationHandler,
     new ToolsListHandler,
     new ToolsCallHandler,
-    new ResourcesListHandler,
-    new ResourcesReadHandler,
+    new ResourcesListHandler(using McpRegistry.resources),
+    new ResourcesReadHandler(using McpRegistry.resources),
     new InitializedNotificationHandler,
     new PromptsListHandler,
     new PromptsGetHandler
