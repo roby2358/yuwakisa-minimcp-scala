@@ -24,8 +24,8 @@ ThisBuild / scalacOptions ++= Seq(
   
 // Common dependencies
 val commonDependencies = Seq(
-  "org.slf4j" % "slf4j-simple" % "2.0.17",
   "org.slf4j" % "slf4j-api" % "2.0.17",
+  "ch.qos.logback" % "logback-classic" % "1.5.13",
   "jakarta.servlet" % "jakarta.servlet-api" % "6.1.0" % Provided,
   "com.fasterxml.jackson.core" % "jackson-core" % "2.19.0",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.19.0",
@@ -57,7 +57,8 @@ lazy val root = (project in file("."))
     // Assembly settings for creating executable JAR
     assembly / assemblyMergeStrategy := {
       case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
-      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+      case PathList("META-INF", xs*) => MergeStrategy.discard
+      case PathList("logback.xml") => MergeStrategy.first
       case x => MergeStrategy.first
     },
     assembly / assemblyJarName := "minimcp.jar",

@@ -6,10 +6,10 @@ import scala.util.Try
 class PingHandler extends MessageHandler:
   def canHandle(method: String): Boolean = method == "ping"
   
-  def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
+  def handle(request: JsonRpcRequest): Try[Option[JsonRpcMessage]] =
     Try {
-      JsonRpcResponse(
+      Some(JsonRpcResponse(
         result = Map.empty,
         id = request.id
-      )
+      ))
     } 

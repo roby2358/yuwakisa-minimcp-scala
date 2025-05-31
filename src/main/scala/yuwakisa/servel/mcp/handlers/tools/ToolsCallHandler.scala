@@ -43,7 +43,7 @@ class ToolsCallHandler(using tools: List[Tool] = McpRegistry.tools) extends Mess
       id = requestId
     )
   
-  def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
+  def handle(request: JsonRpcRequest): Try[Option[JsonRpcMessage]] =
     Try {
       val name = request.params.flatMap(_.get("name").map(_.toString))
       val arguments = request.params.flatMap(_.get("arguments").map(_.asInstanceOf[Map[String, Any]]))
@@ -51,8 +51,8 @@ class ToolsCallHandler(using tools: List[Tool] = McpRegistry.tools) extends Mess
       (name, arguments) match
         case (Some(n), Some(args)) =>
           callTool(n, args) match
-            case Success(result) => callToolSuccess(result, request.id)
-            case Failure(e) => callToolFailure(e, request.id)
+            case Success(result) => Some(callToolSuccess(result, request.id))
+            case Failure(e) => Some(callToolFailure(e, request.id))
         case _ =>
-          callToolFailure("Missing required parameters: name and arguments", request.id, -32602)
+          Some(callToolFailure("Missing required parameters: name and arguments", request.id, -32602))
     } 

@@ -40,7 +40,7 @@ class ResourcesReadHandler(using resources: List[Resource]) extends MessageHandl
       id = requestId
     )
 
-  def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
+  def handle(request: JsonRpcRequest): Try[Option[JsonRpcMessage]] =
     Try:
       val uri = request.params.flatMap(_.get("uri").map(_.toString))
       
@@ -48,14 +48,14 @@ class ResourcesReadHandler(using resources: List[Resource]) extends MessageHandl
         case Some(u) =>
           readResource(u) match
             case Success(contents) =>
-              readResourceSuccess(contents, request.id)
+              Some(readResourceSuccess(contents, request.id))
             case Failure(e) =>
-              readResourceFailure(e.getMessage, request.id)
+              Some(readResourceFailure(e.getMessage, request.id))
         case None =>
-          JsonRpcErrorResponse(
+          Some(JsonRpcErrorResponse(
             error = JsonRpcError(
               code = -32602,
               message = "Missing required parameter: uri"
             ),
             id = request.id
-          )
+          ))

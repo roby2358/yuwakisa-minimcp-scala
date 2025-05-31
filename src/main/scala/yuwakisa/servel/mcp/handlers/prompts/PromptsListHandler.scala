@@ -12,7 +12,7 @@ class PromptsListHandler(using prompts: List[Prompt]) extends MessageHandler:
     // Simple pagination - just return all prompts for now
     (prompts, None)
 
-  def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
+  def handle(request: JsonRpcRequest): Try[Option[JsonRpcMessage]] =
     Try:
       val cursor = request.params.flatMap(_.get("cursor").map(_.toString))
       val (promptsList, nextCursor) = listPrompts(cursor)
@@ -20,7 +20,7 @@ class PromptsListHandler(using prompts: List[Prompt]) extends MessageHandler:
       val result = Map("prompts" -> promptsList) ++ 
         nextCursor.map(cursor => Map("nextCursor" -> cursor)).getOrElse(Map.empty)
       
-      JsonRpcResponse(
+      Some(JsonRpcResponse(
         result = result,
         id = request.id
-      ) 
+      )) 

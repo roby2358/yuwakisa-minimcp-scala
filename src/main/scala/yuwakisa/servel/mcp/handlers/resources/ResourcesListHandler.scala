@@ -12,7 +12,7 @@ class ResourcesListHandler(using resources: List[Resource]) extends MessageHandl
     // Simple pagination - just return all resources for now
     (resources, None)
 
-  def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
+  def handle(request: JsonRpcRequest): Try[Option[JsonRpcMessage]] =
     Try:
       val cursor = request.params.flatMap(_.get("cursor").map(_.toString))
       val (resources, nextCursor) = listResources(cursor)
@@ -20,7 +20,7 @@ class ResourcesListHandler(using resources: List[Resource]) extends MessageHandl
       val result = Map("resources" -> resources) ++ 
         nextCursor.map(cursor => Map("nextCursor" -> cursor)).getOrElse(Map.empty)
       
-      JsonRpcResponse(
+      Some(JsonRpcResponse(
         result = result,
         id = request.id
-      ) 
+      )) 

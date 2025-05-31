@@ -5,4 +5,4 @@ import scala.util.Try
 
 trait MessageHandler:
   def canHandle(method: String): Boolean
-  def handle(request: JsonRpcRequest): Try[JsonRpcMessage] 
+  def handle(request: JsonRpcRequest): Try[Option[JsonRpcMessage]] 

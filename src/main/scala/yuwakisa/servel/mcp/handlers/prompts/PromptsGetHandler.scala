@@ -11,7 +11,7 @@ import scala.util.{Failure, Success, Try}
 class PromptsGetHandler(using prompts: List[Prompt]) extends MessageHandler:
   def canHandle(method: String): Boolean = method == "prompts/get"
 
-  def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
+  def handle(request: JsonRpcRequest): Try[Option[JsonRpcMessage]] =
     Try:
       val params = request.params.getOrElse(Map.empty)
       val name = params.get("name").map(_.toString)
@@ -21,26 +21,26 @@ class PromptsGetHandler(using prompts: List[Prompt]) extends MessageHandler:
         case Some(n) =>
           prompts.find(_.name == n) match
             case Some(prompt) =>
-              JsonRpcResponse(
+              Some(JsonRpcResponse(
                 result = Map(
                   "messages" -> prompt.getMessages(arguments),
                   "includeContext" -> "none"
                 ),
                 id = request.id
-              )
+              ))
             case None =>
-              JsonRpcErrorResponse(
+              Some(JsonRpcErrorResponse(
                 error = JsonRpcError(
                   code = -32001,
                   message = s"Prompt not found: $n"
                 ),
                 id = request.id
-              )
+              ))
         case None =>
-          JsonRpcErrorResponse(
+          Some(JsonRpcErrorResponse(
             error = JsonRpcError(
               code = -32602,
               message = "Missing required parameter: name"
             ),
             id = request.id
-          ) 
+          )) 

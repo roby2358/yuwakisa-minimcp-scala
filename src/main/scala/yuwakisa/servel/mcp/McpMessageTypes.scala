@@ -17,11 +17,13 @@ object McpMessageTypes {
     override val id: Option[String] = None
   ) extends JsonRpcMessage
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   case class JsonRpcResponse(
     result: Any,
     override val id: Option[String]
   ) extends JsonRpcMessage
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   case class JsonRpcErrorResponse(
     error: JsonRpcError,
     override val id: Option[String]

@@ -6,14 +6,14 @@ import scala.util.Try
 class InitializeHandler extends MessageHandler:
   def canHandle(method: String): Boolean = method == "initialize"
   
-  def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
+  def handle(request: JsonRpcRequest): Try[Option[JsonRpcMessage]] =
     Try {
       val params = request.params.getOrElse(Map.empty)
       val capabilities = params.get("capabilities").map(_.asInstanceOf[Map[String, Any]]).getOrElse(Map.empty)
       
       // TODO: Validate protocol version and other params
       
-      JsonRpcResponse(
+      Some(JsonRpcResponse(
         result = Map(
           "protocolVersion" -> "2025-03-26",
           "capabilities" -> Map(
@@ -31,5 +31,5 @@ class InitializeHandler extends MessageHandler:
           )
         ),
         id = request.id
-      )
+      ))
     } 

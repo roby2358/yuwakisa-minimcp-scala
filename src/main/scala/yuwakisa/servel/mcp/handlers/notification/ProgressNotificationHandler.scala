@@ -7,7 +7,7 @@ import scala.util.Try
 class ProgressNotificationHandler extends MessageHandler:
   def canHandle(method: String): Boolean = method == "notifications/progress"
   
-  def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
+  def handle(request: JsonRpcRequest): Try[Option[JsonRpcMessage]] =
     Try {
       val progressToken = request.params.flatMap(_.get("progressToken").map(_.toString))
       val progress = request.params.flatMap(_.get("progress").map(_.asInstanceOf[Number].doubleValue()))
@@ -16,8 +16,6 @@ class ProgressNotificationHandler extends MessageHandler:
       
       // TODO: Implement progress tracking logic
       
-      JsonRpcResponse(
-        result = Map.empty,
-        id = request.id
-      )
+      // This is a notification, so we return None to indicate no response should be sent
+      None
     } 

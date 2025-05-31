@@ -3,6 +3,7 @@ package yuwakisa.servel.mcp
 import scala.util.{Try, Success, Failure}
 import McpMessageTypes.*
 import yuwakisa.servel.mcp.handlers.MessageHandlerRegistry
+import java.io.IOException
 
 class StdioServer:
   private val transport = new StdioTransport()
@@ -25,8 +26,18 @@ class StdioServer:
     MessageHandlerRegistry.getHandler(request.method) match
       case Some(handler) =>
         handler.handle(request) match
-          case Success(response) =>
-            transport.writeMessage(response)
+          case Success(Some(response)) =>
+            transport.writeMessage(response) match
+              case Success(_) => // Message sent successfully
+              case Failure(e: IOException) =>
+                transport.writeError(s"Connection broken: ${e.getMessage}")
+                isRunning = false
+              case Failure(e) =>
+                transport.writeError(s"Failed to send response: ${e.getMessage}")
+                isRunning = false
+          case Success(None) =>
+            // No response needed for notifications
+            ()
           case Failure(e) =>
             val errorResponse = JsonRpcErrorResponse(
               error = JsonRpcError(
@@ -35,7 +46,14 @@ class StdioServer:
               ),
               id = request.id
             )
-            transport.writeMessage(errorResponse)
+            transport.writeMessage(errorResponse) match
+              case Success(_) => // Error response sent successfully
+              case Failure(e: IOException) =>
+                transport.writeError(s"Connection broken: ${e.getMessage}")
+                isRunning = false
+              case Failure(e) =>
+                transport.writeError(s"Failed to send error response: ${e.getMessage}")
+                isRunning = false
       case None =>
         val errorResponse = JsonRpcErrorResponse(
           error = JsonRpcError(
@@ -44,7 +62,14 @@ class StdioServer:
           ),
           id = request.id
         )
-        transport.writeMessage(errorResponse)
+        transport.writeMessage(errorResponse) match
+          case Success(_) => // Error response sent successfully
+          case Failure(e: IOException) =>
+            transport.writeError(s"Connection broken: ${e.getMessage}")
+            isRunning = false
+          case Failure(e) =>
+            transport.writeError(s"Failed to send error response: ${e.getMessage}")
+            isRunning = false
 
   def stop(): Unit =
     isRunning = false 
