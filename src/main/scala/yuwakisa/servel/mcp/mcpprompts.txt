@@ -1,0 +1,61 @@
+MCP Prompts — Client ↔ Server Interactions
+
+A pocket spec for language-model agents.
+
+The prompts feature lets a server expose reusable prompt templates that an LLM can invoke with arguments. A server that supports it must declare
+
+"capabilities": { "prompts": { "listChanged": true } }
+
+so the client knows (a) prompts exist and (b) a notification will arrive if the list later changes. (Model Context Protocol)
+
+1. Discovering prompts
+
+Send a JSON-RPC request method:"prompts/list". params may carry a cursor; the reply returns prompts[] plus an optional nextCursor for pagination. Each prompt entry contains name, description, arguments (array of argument definitions), includeContext ("none" | "thisServer" | "allServers", optional), and annotations (optional metadata). (Model Context Protocol)
+
+Each argument contains name, description, required (boolean), and schema (JSON Schema, optional).
+
+If the server set listChanged:true, it will later emit the push-notification
+
+{"jsonrpc":"2.0","method":"notifications/prompts/list_changed"}
+
+so the client can call prompts/list again. (Model Context Protocol)
+
+2. Getting a prompt
+
+Invoke with
+
+{
+  "jsonrpc":"2.0",
+  "id":8,
+  "method":"prompts/get",
+  "params":{
+    "name":"<prompt-name>",
+    "arguments":{ … }        // must satisfy argument schemas
+  }
+}
+
+The server returns messages[] (array of role-based messages), includeContext, and optional metadata. Each message has role ("user" | "assistant" | "system") and content.
+
+Content types:
+- text: { "type": "text", "text": "..." }
+- image: { "type": "image", "data": "base64...", "mimeType": "image/png" }
+- resource: { "type": "resource", "uri": "...", "text"?: "...", "mimeType"?: "..." }
+
+Context inclusion values:
+- "none" — prompt stands alone
+- "thisServer" — include resources/tools from this server
+- "allServers" — include resources/tools from all connected servers
+
+3. Errors
+
+-32602 "invalid params" for bad arguments or schema violations
+-32001 "prompt not found", and
+-32603 "internal error" follow standard JSON-RPC patterns. (Model Context Protocol)
+
+
+4. Security in one breath
+
+Servers must validate and sanitize all arguments, prevent prompt injection, enforce access control, rate-limit expensive generations, and screen outputs. Clients should validate responses and handle untrusted content safely.
+
+TL;DR
+Advertise prompts capability, let clients prompts/list, fetch with prompts/get passing validated arguments, return role-based messages with optional context inclusion, push notifications/prompts/list_changed when catalogue shifts, wrap in JSON-RPC envelope.
