@@ -2,10 +2,46 @@ package yuwakisa.servel.mcp.handlers.tools
 
 import yuwakisa.servel.mcp.handlers.MessageHandler
 import yuwakisa.servel.mcp.McpMessageTypes.*
+import yuwakisa.servel.mcp.McpRegistry
 import scala.util.{Try, Success, Failure}
 
-class ToolsCallHandler extends MessageHandler:
+class ToolsCallHandler(using tools: List[Tool] = McpRegistry.tools) extends MessageHandler:
   def canHandle(method: String): Boolean = method == "tools/call"
+  
+  private def callTool(name: String, arguments: Map[String, Any]): Try[ToolResult] =
+    tools.find(_.name == name) match
+      case Some(tool) =>
+        Try {
+          val result = tool.call(arguments)
+          ToolResult(
+            content = result("content").asInstanceOf[List[Map[String, Any]]],
+            structuredContent = result("structuredContent").asInstanceOf[Map[String, Any]],
+            isError = result("isError").asInstanceOf[Boolean]
+          )
+        }
+      case None =>
+        Failure(new IllegalArgumentException(s"Tool not found: $name"))
+
+  private def callToolSuccess(result: ToolResult, requestId: Option[String]): JsonRpcResponse =
+    JsonRpcResponse(
+      result = Map(
+        "content" -> result.content,
+        "structuredContent" -> result.structuredContent,
+        "isError" -> result.isError
+      ),
+      id = requestId
+    )
+
+  private def callToolFailure(error: Throwable | String, requestId: Option[String], code: Int = -32603): JsonRpcErrorResponse =
+    JsonRpcErrorResponse(
+      error = JsonRpcError(
+        code = code,
+        message = error match
+          case e: Throwable => e.getMessage
+          case s: String => s
+      ),
+      id = requestId
+    )
   
   def handle(request: JsonRpcRequest): Try[JsonRpcMessage] =
     Try {
@@ -14,30 +50,9 @@ class ToolsCallHandler extends MessageHandler:
       
       (name, arguments) match
         case (Some(n), Some(args)) =>
-          McpTools.executeTool(n, args) match
-            case Success(result) =>
-              JsonRpcResponse(
-                result = Map(
-                  "content" -> result.content,
-                  "structuredContent" -> result.structuredContent,
-                  "isError" -> result.isError
-                ),
-                id = request.id
-              )
-            case Failure(e) =>
-              JsonRpcErrorResponse(
-                error = JsonRpcError(
-                  code = -32603,
-                  message = e.getMessage
-                ),
-                id = request.id
-              )
+          callTool(n, args) match
+            case Success(result) => callToolSuccess(result, request.id)
+            case Failure(e) => callToolFailure(e, request.id)
         case _ =>
-          JsonRpcErrorResponse(
-            error = JsonRpcError(
-              code = -32602,
-              message = "Missing required parameters: name and arguments"
-            ),
-            id = request.id
-          )
+          callToolFailure("Missing required parameters: name and arguments", request.id, -32602)
     } 
