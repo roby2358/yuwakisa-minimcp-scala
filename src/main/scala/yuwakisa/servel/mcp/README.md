@@ -1,6 +1,8 @@
 # Model Context Protocol (MCP) Implementation
 
-This directory contains the implementation of the Model Context Protocol (version 2025-03-26), a JSON-RPC 2.0 based protocol for LLM agent communication.
+This directory contains the implementation of the Model Context Protocol (version 2024-11-05), a JSON-RPC 2.0 based protocol for LLM agent communication.
+
+> **Note on Version Compatibility**: While this implementation uses MCP version 2024-11-05 for stdio transport (for Claude Desktop compatibility), it maintains support for the streamable HTTP transport features from version 2025-03-26.
 
 ## Overview
 

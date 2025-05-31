@@ -2,7 +2,7 @@ Model Context Protocol — Message-Level Spec
 
 A super-compact crib sheet for LLM agents and tool authors.
 
-MCP Verison: 2025-03-26
+MCP Verison: 2024-11-05
 
 1. Envelope (JSON-RPC 2.0) (Model Context Protocol)
 

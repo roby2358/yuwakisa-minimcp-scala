@@ -1,4 +1,4 @@
-Streamable HTTP Transport — Model Context Protocol (2025-03-26)
+Streamable HTTP Transport — Model Context Protocol (2024-11-05)
 
 A terse, implementation-accurate reference for LLM agents.
 

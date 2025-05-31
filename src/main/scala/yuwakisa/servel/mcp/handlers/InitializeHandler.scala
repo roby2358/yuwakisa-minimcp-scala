@@ -15,7 +15,7 @@ class InitializeHandler extends MessageHandler:
       
       Some(JsonRpcResponse(
         result = Map(
-          "protocolVersion" -> "2025-03-26",
+          "protocolVersion" -> "2024-11-05",
           "capabilities" -> Map(
             "roots" -> Map("listChanged" -> true),
             "resources" -> Map("listChanged" -> true, "subscribe" -> true),

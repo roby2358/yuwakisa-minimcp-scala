@@ -18,12 +18,12 @@ class StdioTransport:
 
   def readMessage(): Try[JsonRpcRequest] =
     Try:
-      trace("Reading message from stdin")
+      trace("Reading message")
       val line = reader.readLine()
+      trace(s"Read line from stdin: $line")
       if line == null then
         trace("Received null line - end of input stream")
         throw new IllegalStateException("End of input stream")
-      trace(s"Read line: $line")
       objectMapper.readValue(line, classOf[JsonRpcRequest])
 
   def writeMessage(message: JsonRpcMessage): Try[Unit] =
@@ -46,10 +46,4 @@ class StdioTransport:
     .recoverWith { case e: IOException =>
       trace(s"Failed to write error: ${e.getMessage}")
       Failure(new IOException(s"Failed to write error: ${e.getMessage}", e))
-    }
-
-  def close(): Unit =
-    trace("Closing transport")
-    Try(reader.close())
-    Try(writer.close())
-    Try(errorWriter.close()) 
+    } 
