@@ -57,7 +57,7 @@ lazy val root = (project in file("."))
     // Assembly settings for creating executable JAR
     assembly / assemblyMergeStrategy := {
       case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
-      case PathList("META-INF", xs*) => MergeStrategy.discard
+      case PathList("META-INF", xs_*) => MergeStrategy.discard
       case PathList("logback.xml") => MergeStrategy.first
       case x => MergeStrategy.first
     },
