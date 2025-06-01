@@ -1,76 +1,130 @@
 A concise reference for LLM agents implementing the Model Context Protocol stdio transport.
+
 Core Concept
 MCP uses JSON-RPC to encode messages. JSON-RPC messages MUST be UTF-8 encoded. The client launches the MCP server as a subprocess. The server reads JSON-RPC messages from its standard input (stdin) and sends messages to its standard output (stdout).
+
 Message Format
 
 Protocol: JSON-RPC 2.0 over UTF-8 encoding
 Delimiter: Messages are delimited by newlines, and MUST NOT contain embedded newlines
 Streams:
-
-stdin: Client → Server messages
-stdout: Server → Client messages
-stderr: The server MAY write UTF-8 strings to its standard error (stderr) for logging purposes. Clients MAY capture, forward, or ignore this logging
-
-
+- stdin: Client → Server messages
+- stdout: Server → Client messages
+- stderr: The server writes UTF-8 strings to stderr for logging purposes. Messages are prefixed with [TRACE] for tracing and Error: for errors.
 
 Message Types
 All messages follow JSON-RPC 2.0:
-Request
-json{
-  "jsonrpc": "2.0",
-  "id": "string | number",
-  "method": "string",
-  "params": { ... }
-}
-Response
-json{
-  "jsonrpc": "2.0",
-  "id": "string | number",
-  "result": { ... }  // OR "error": { "code": number, "message": "string" }
-}
-Notification
-json{
-  "jsonrpc": "2.0",
-  "method": "string",
-  "params": { ... }
-}
-Transport Characteristics
 
-Process Model: The client (spawns an MCP server as a child process
-Communication: Communication happens through process streams: client writes to server's STDIN, server responds to STDOUT
-Message Boundary: Each message is delimited by a newline character
-Relationship: One-to-one relationship between client and server
+Request
+{
+  "jsonrpc": "2.0",
+  "id": "string | number",
+  "method": "string",
+  "params": { ... }  // Optional
+}
+
+Response
+{
+  "jsonrpc": "2.0",
+  "id": "string | number",
+  "result": { ... }  // OR "error": { "code": number, "message": "string", "data": any }
+}
+
+Notification
+{
+  "jsonrpc": "2.0",
+  "method": "string",
+  "params": { ... }  // Optional
+}
+
+Transport Characteristics
+- Process Model: The client spawns an MCP server as a child process
+- Communication: Communication happens through process streams: client writes to server's STDIN, server responds to STDOUT
+- Message Boundary: Each message is delimited by a newline character
+- Relationship: One-to-one relationship between client and server
+- Error Handling: All operations return Try[T] to handle potential failures gracefully
+- Error Tolerance: Message processing should be fault-tolerant to maintain stream continuity. Invalid messages should be logged and skipped rather than terminating the connection.
 
 Connection Lifecycle
+1. Launch: Client spawns server as subprocess
+2. Initialize: Client sends initialize request with capabilities
+   {
+     "jsonrpc": "2.0",
+     "id": "1",
+     "method": "initialize",
+     "params": {
+       "protocolVersion": "2024-11-05",
+       "capabilities": { ... },
+       "clientInfo": {
+         "name": "string",
+         "version": "string"
+       }
+     }
+   }
 
-Launch: Client spawns server as subprocess
-Initialize: Client sends initialize request with capabilities
-Handshake: Server responds with its capabilities
-Ready: Client sends initialized notification
-Operation: Normal JSON-RPC message exchange
-Termination: The transport is closed (e.g., client closes stdin for stdio)
+3. Handshake: Server responds with its capabilities
+   {
+     "jsonrpc": "2.0",
+     "id": "1",
+     "result": {
+       "protocolVersion": "2024-11-05",
+       "capabilities": {
+         "roots": { "listChanged": true },
+         "resources": { "listChanged": true, "subscribe": true },
+         "tools": { "listChanged": true },
+         "prompts": { "listChanged": true },
+         "sampling": {},
+         "logging": {},
+         "experimental": {}
+       },
+       "serverInfo": {
+         "name": "string",
+         "version": "string"
+       }
+     }
+   }
+
+4. Ready: Client sends initialized notification
+   {
+     "jsonrpc": "2.0",
+     "method": "notifications/initialized"
+   }
+
+5. Operation: Normal JSON-RPC message exchange
+6. Termination: The transport is closed when:
+   - Client closes stdin
+   - Server receives null from stdin (end of input stream)
+   - Server encounters a fatal error that disallow any further processing
+
+Error Handling
+- All operations return Try[T] to handle potential failures
+- IO errors are wrapped in IOException with descriptive messages
+- Server continues running despite non-fatal errors
+- Fatal errors (like end of input stream) cause server shutdown
 
 Security & Authentication
-Implementations using STDIO transport SHOULD NOT follow this specification, and instead retrieve credentials from the environment - no HTTP-based authentication required.
-Advantages
+- Implementations using STDIO transport SHOULD NOT follow HTTP-based authentication
+- Credentials should be retrieved from the environment
+- No network exposure, inherently more secure
 
-Performance: Very low latency and overhead (no network stack involved)
-Simplicity: Direct process communication without network configuration
-Security: Inherently more secure as no network exposure
-Reliability: Guaranteed message delivery within the same process
+Advantages
+- Performance: Very low latency and overhead (no network stack involved)
+- Simplicity: Direct process communication without network configuration
+- Security: Inherently more secure as no network exposure
+- Reliability: Guaranteed message delivery within the same process
+- Debugging: Built-in tracing support via stderr
 
 Limitations
+- Supports only single client connections
+- Local execution only
+- No built-in streaming support (unlike HTTP transport)
 
-Supports only single client connections and lacks network accessibility
-Local execution only
-No built-in streaming support (unlike HTTP transport)
-
-Minimal Implementation
-bash# Launch server
+Minimal Implementation Example
+# Launch server
 ./mcp-server
 
 # Send initialize request (newline-delimited)
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","clientInfo":{"name":"client","version":"1.0"}}}' | ./mcp-server
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","clientInfo":{"name":"client","version":"1.0"}}}' | ./mcp-server
 
 # Send message and read response
 echo '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
