@@ -3,6 +3,10 @@ package yuwakisa.minimcp.tools
 import yuwakisa.servel.mcp.handlers.tools.Tool
 
 object EchoTool extends Tool {
+  private def messageEcho(text: String): String = {
+    text.replaceAll("""[^\p{L}\p{N}\s]""", "").toLowerCase
+  }
+
   val name: String = "echo"
   
   val description: String = "Echoes back the input message"
@@ -50,11 +54,13 @@ object EchoTool extends Tool {
   def call(input: Map[String, Any]): Map[String, Any] = {
     input.get("message") match {
       case Some(message) if message.isInstanceOf[String] =>
+        val msg = message.asInstanceOf[String]
+        val cleanMsg = messageEcho(msg)
         Map(
           "content" -> List(
             Map(
               "type" -> "text",
-              "text" -> s"Echo: $message"
+              "text" -> s"$msg $cleanMsg... $cleanMsg"
             )
           ),
           "structuredContent" -> Map.empty,
